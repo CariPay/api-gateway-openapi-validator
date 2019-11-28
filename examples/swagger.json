@@ -1,0 +1,942 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "OCR and IRISK API",
+        "description": "API documentation for OCR and IRISK",
+        "contact": {
+            "email": "darion@caripay.net"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://ocr.dev.api.d-id.mobi",
+            "description": "Development API for KYC Rest (dev)"
+        }
+    ],
+    "tags": [
+        {
+            "name": "ocr",
+            "description": "Routes that exist in the ocr API"
+        },
+        {
+            "name": "irisk",
+            "description": "Routes that exist in the irisk API"
+        },
+        {
+            "name": "facelook",
+            "description": "Routes that exist in the facelook API"
+        }
+    ],
+    "paths": {
+        "/health": {
+            "get": {
+                "tags": [
+                    "ocr",
+                    "irisk",
+                    "facelook"
+                ],
+                "summary": "Gets the health of the API server",
+                "operationId": "health",
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/id_ocr": {
+            "post": {
+                "tags": [
+                    "ocr"
+                ],
+                "summary": "Sends data to ocr server to extract the data for an ID",
+                "operationId": "idOcr",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IdRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_1"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Required Key(s) missing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/bill_ocr": {
+            "post": {
+                "tags": [
+                    "ocr"
+                ],
+                "summary": "Sends data to ocr server to extract the data for a BILL",
+                "operationId": "billOcr",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BillRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_2"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Required Key(s) missing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/document_ocr": {
+            "post": {
+                "tags": [
+                    "ocr"
+                ],
+                "summary": "Send data to ocr server to extract the data for an DOCUMENT",
+                "operationId": "documentOcr",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DocumentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DocumentResult"
+                                }
+                            }
+                        }
+                    },
+                    "202": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_202"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Required Key(s) missing",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/template": {
+            "post": {
+                "tags": [
+                    "ocr"
+                ],
+                "summary": "Creates yaml templates for ocr-ing new documents",
+                "operationId": "templateOcr",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TemplateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_3"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Missing Key(s)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Error"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/detect": {
+            "post": {
+                "tags": [
+                    "irisk"
+                ],
+                "summary": "Sends a request to the blink detection server to detect the number of blinks in a video",
+                "operationId": "postDetect",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IriskRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IriskResult"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/compare": {
+            "post": {
+                "tags": [
+                    "facelook"
+                ],
+                "summary": "Send a request the the face look compare server to compare faces from 2 pictures for similarity",
+                "operationId": "postCompare",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/FaceLookRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_200_4"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Missing Key(s)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/inline_response_500"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/": {
+            "get": {
+                "tags": [
+                    "irisk",
+                    "facelook"
+                ],
+                "summary": "Gets the status of the API",
+                "responses": {
+                    "200": {
+                        "description": "Operation is successful",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                },
+                                "examples": {
+                                    "irisk": {
+                                        "value": "CARIPAY - Blink Detection RESTful API"
+                                    },
+                                    "facelook": {
+                                        "value": "KYC - FACIAL COMPARISON"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "BillResult": {
+                "type": "object",
+                "properties": {
+                    "bill_uuid": {
+                        "type": "string"
+                    },
+                    "bucket": {
+                        "type": "string"
+                    },
+                    "bucket_name": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "file_key": {
+                        "type": "string"
+                    },
+                    "file_type": {
+                        "type": "string"
+                    },
+                    "file_uuid": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/Meta"
+                    },
+                    "user_uuid": {
+                        "type": "string"
+                    },
+                    "uuid": {
+                        "type": "string"
+                    }
+                }
+            },
+            "BillRequest": {
+                "type": "object",
+                "properties": {
+                    "file_key": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "file_type": {
+                        "type": "string"
+                    },
+                    "file_uuid": {
+                        "type": "string"
+                    },
+                    "user_uuid": {
+                        "type": "string"
+                    },
+                    "bucket": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DocumentResult": {
+                "type": "object"
+            },
+            "DocumentRequest": {
+                "type": "object",
+                "properties": {
+                    "file_key": {
+                        "type": "string"
+                    },
+                    "file_uuid": {
+                        "type": "string"
+                    },
+                    "user_uuid": {
+                        "type": "string"
+                    },
+                    "bucket": {
+                        "type": "string"
+                    }
+                }
+            },
+            "Error": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object"
+                    },
+                    "error": {
+                        "type": "string"
+                    }
+                }
+            },
+            "FaceLookRequest": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string"
+                    },
+                    "image_path_1": {
+                        "type": "string"
+                    },
+                    "image_path_2": {
+                        "type": "string"
+                    },
+                    "bucket1": {
+                        "type": "string"
+                    },
+                    "bucket2": {
+                        "type": "string"
+                    }
+                }
+            },
+            "FaceLookResult": {
+                "type": "object",
+                "properties": {
+                    "elapsed": {
+                        "type": "number"
+                    },
+                    "error": {
+                        "type": "string"
+                    },
+                    "is_match": {
+                        "type": "number"
+                    },
+                    "similarity": {
+                        "type": "number"
+                    },
+                    "uuid": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IdResult": {
+                "type": "object",
+                "properties": {
+                    "birthplace": {
+                        "type": "string"
+                    },
+                    "bucket": {
+                        "type": "string"
+                    },
+                    "citizenship": {
+                        "type": "string"
+                    },
+                    "config": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "dob": {
+                        "type": "string"
+                    },
+                    "expiry_date": {
+                        "type": "string"
+                    },
+                    "eye_color": {
+                        "type": "string"
+                    },
+                    "file_key": {
+                        "type": "string"
+                    },
+                    "file_type": {
+                        "type": "string"
+                    },
+                    "file_uuid": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "height": {
+                        "type": "string"
+                    },
+                    "id_side": {
+                        "type": "string"
+                    },
+                    "id_uuid": {
+                        "type": "string"
+                    },
+                    "issue_date": {
+                        "type": "string"
+                    },
+                    "key": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "meta": {
+                        "$ref": "#/components/schemas/IdResult_meta"
+                    },
+                    "middle_name": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "nis_no": {
+                        "type": "string"
+                    },
+                    "reg_no": {
+                        "type": "string"
+                    },
+                    "sex": {
+                        "type": "string"
+                    },
+                    "skin_colour": {
+                        "type": "string"
+                    },
+                    "soa_no": {
+                        "type": "string"
+                    },
+                    "upload_path": {
+                        "type": "string"
+                    },
+                    "user_uuid": {
+                        "type": "string"
+                    },
+                    "uuid": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IdRequest": {
+                "type": "object",
+                "properties": {
+                    "file_key": {
+                        "type": "string"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "id_side": {
+                        "type": "string"
+                    },
+                    "file_type": {
+                        "type": "string"
+                    },
+                    "file_uuid": {
+                        "type": "string"
+                    },
+                    "user_uuid": {
+                        "type": "string"
+                    },
+                    "bucket": {
+                        "type": "string"
+                    }
+                }
+            },
+            "IriskResult": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string",
+                        "description": "The uuid of the user performing blink detection"
+                    },
+                    "blink_detection_uuid": {
+                        "type": "string",
+                        "description": "Placeholder"
+                    },
+                    "elapsed": {
+                        "type": "string",
+                        "description": "The amount of time elapsed, processing the data"
+                    },
+                    "blinks_detected": {
+                        "type": "string",
+                        "description": "The number of blinks detected in the video"
+                    },
+                    "face_capture1": {
+                        "type": "string",
+                        "description": "The path to the first still capture of the blink detection video"
+                    },
+                    "face_capture2": {
+                        "type": "string",
+                        "description": "The path to the second still capture of the blink detection video"
+                    },
+                    "face_capture3": {
+                        "type": "string",
+                        "description": "The path to the third still capture of the blink detection video"
+                    },
+                    "bucket": {
+                        "type": "string",
+                        "description": "The bucket name where the data is stored"
+                    },
+                    "done": {
+                        "type": "string",
+                        "description": "Whether the blink detection was completed successfully",
+                        "example": "true",
+                        "default": "true"
+                    },
+                    "error": {
+                        "type": "string",
+                        "example": "Null",
+                        "default": "Null"
+                    },
+                    "statusCode": {
+                        "type": "number",
+                        "example": 200,
+                        "default": 200
+                    },
+                    "body": {
+                        "$ref": "#/components/schemas/IriskResult_body"
+                    }
+                }
+            },
+            "IriskRequest": {
+                "type": "object",
+                "properties": {
+                    "uuid": {
+                        "type": "string",
+                        "description": "The uuid of the user performing blink detection"
+                    },
+                    "blink_detection_uuid": {
+                        "type": "string",
+                        "description": "The uuid of the blink detection instance obtained from the s3 key"
+                    }
+                }
+            },
+            "Meta": {
+                "type": "object",
+                "properties": {
+                    "accuracy": {
+                        "type": "string",
+                        "description": "The accuracy of the extraction results"
+                    },
+                    "country": {
+                        "type": "string"
+                    },
+                    "created_on": {
+                        "type": "string",
+                        "description": "The date in which the document was created in the database"
+                    },
+                    "error": {
+                        "type": "object"
+                    },
+                    "expired": {
+                        "type": "string",
+                        "description": "Whether the document is expired"
+                    },
+                    "primary": {
+                        "type": "string",
+                        "description": "Whether this is a primary document"
+                    },
+                    "upload_device": {
+                        "$ref": "#/components/schemas/Meta_upload_device"
+                    },
+                    "verified": {
+                        "type": "string"
+                    },
+                    "version": {
+                        "type": "string",
+                        "description": "The iterated version of the document after it has been updated"
+                    }
+                }
+            },
+            "ObjectVals": {
+                "type": "object",
+                "properties": {
+                    "clean_vals": {
+                        "$ref": "#/components/schemas/ObjectVals_clean_vals"
+                    },
+                    "crop_vals": {
+                        "$ref": "#/components/schemas/ObjectVals_crop_vals"
+                    },
+                    "tesseract_vals": {
+                        "$ref": "#/components/schemas/ObjectVals_tesseract_vals"
+                    }
+                }
+            },
+            "TemplateRequest": {
+                "type": "object",
+                "properties": {
+                    "bucket": {
+                        "type": "string"
+                    },
+                    "s3_template_path_1": {
+                        "type": "string"
+                    },
+                    "s3_template_path_2": {
+                        "type": "string"
+                    },
+                    "template_name": {
+                        "type": "string"
+                    }
+                }
+            },
+            "TemplateResult": {
+                "type": "object",
+                "properties": {
+                    "country": {
+                        "type": "string",
+                        "example": "TRINIDAD & TOBAGO"
+                    },
+                    "fields": {
+                        "$ref": "#/components/schemas/TemplateResult_fields"
+                    },
+                    "img_template": {
+                        "type": "string",
+                        "example": "nis_1.png"
+                    },
+                    "rekognition": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "rekognition_validated": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "scale": {
+                        "$ref": "#/components/schemas/TemplateResult_scale"
+                    },
+                    "tesseract_clean": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "tesseract_no_clean": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                }
+            },
+            "inline_response_200": {
+                "type": "object",
+                "properties": {
+                    "healthy": {
+                        "type": "string",
+                        "default": "true",
+                        "enum": [
+                            "true"
+                        ]
+                    }
+                }
+            },
+            "inline_response_200_1": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/IdResult"
+                    }
+                }
+            },
+            "inline_response_200_2": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/BillResult"
+                    }
+                }
+            },
+            "inline_response_202": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object"
+                    },
+                    "message": {
+                        "type": "string"
+                    }
+                }
+            },
+            "inline_response_200_3": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/TemplateResult"
+                    }
+                }
+            },
+            "inline_response_200_4": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/FaceLookResult"
+                    }
+                }
+            },
+            "inline_response_500": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "object"
+                    }
+                }
+            },
+            "IdResult_meta": {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "object"
+                    }
+                }
+            },
+            "IriskResult_body": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "blinks detected and extracted",
+                        "default": "blinks detected and extracted"
+                    }
+                }
+            },
+            "Meta_upload_device": {
+                "type": "object",
+                "properties": {
+                    "device": {
+                        "type": "string"
+                    }
+                }
+            },
+            "ObjectVals_clean_vals": {
+                "type": "object",
+                "properties": {
+                    "intensity": {
+                        "type": "integer",
+                        "format": "int_64",
+                        "example": 0
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "numbers"
+                    }
+                }
+            },
+            "ObjectVals_crop_vals": {
+                "type": "object",
+                "properties": {
+                    "x1": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "x2": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "x3": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "x4": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "y1": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "y2": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "y3": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "y4": {
+                        "type": "integer",
+                        "format": "int_64"
+                    }
+                }
+            },
+            "ObjectVals_tesseract_vals": {
+                "type": "object",
+                "properties": {
+                    "dpi": {
+                        "type": "integer",
+                        "format": "int_64"
+                    },
+                    "psm": {
+                        "type": "integer",
+                        "format": "int_64"
+                    }
+                }
+            },
+            "TemplateResult_fields": {
+                "type": "object",
+                "properties": {
+                    "doe": {
+                        "$ref": "#/components/schemas/ObjectVals"
+                    },
+                    "f_name": {
+                        "$ref": "#/components/schemas/ObjectVals"
+                    },
+                    "l_name": {
+                        "$ref": "#/components/schemas/ObjectVals"
+                    },
+                    "nis_no": {
+                        "$ref": "#/components/schemas/ObjectVals"
+                    }
+                }
+            },
+            "TemplateResult_scale": {
+                "type": "object",
+                "properties": {
+                    "height": {
+                        "type": "integer",
+                        "format": "int_64",
+                        "example": 338
+                    },
+                    "width": {
+                        "type": "integer",
+                        "format": "int_64",
+                        "example": 561
+                    }
+                }
+            }
+        }
+    }
+}
