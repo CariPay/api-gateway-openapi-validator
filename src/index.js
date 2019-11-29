@@ -103,7 +103,7 @@ module.exports = class OpenApiValidator {
                 headers: event.headers || {},
                 params: event.pathParameters || {},
             };
-            requestValidator.validate(path, request, schema);
+            requestValidator.validate(path, request);
         }
     }
 }

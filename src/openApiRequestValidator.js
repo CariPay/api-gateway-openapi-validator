@@ -13,9 +13,9 @@ module.exports = class RequestValidator {
         this._ajv = createRequestAjv(apiDoc, options);
     }
 
-    validate(path, request, schema, options = {}) {
-        let { requestBody } = schema;
-        const { parameters } = schema;
+    validate(path, request, options = {}) {
+        let { requestBody } = this._schema;
+        const { parameters } = this._schema;
 
         const contentType = options.contentType || TYPE_JSON;
 
