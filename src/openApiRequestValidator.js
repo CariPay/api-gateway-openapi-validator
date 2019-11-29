@@ -30,13 +30,16 @@ module.exports = class RequestValidator {
             if (requestBody.required) requiredAdds.push('body');
         }
 
+        const additionalBody = this._options.additionalProperties.body || false;
+
         const apiSchema = {
             required: ['query', 'headers', 'params'].concat(requiredAdds),
             properties: {
-                body,
-                query: {},
-                headers: {},
-                params: {},
+                body: {
+                    ...body,
+                    additionalProperties: additionalBody,
+                },
+                ...params.schema,
             },
         };
 
@@ -107,11 +110,26 @@ module.exports = class RequestValidator {
     }
 
     parametersToSchema(parameters = []) {
+        const additionalQuery = this._options.additionalProperties.query || false;
+        const additionalParams = this._options.additionalProperties.params || false;
+        const additionalHeaders = this._options.additionalProperties.headers === null
+            ? true
+            : this._options.additionalProperties.headers;
+        const additionalCookies = this._options.additionalProperties.cookies || false;
+
         const schema = {
-            query: {},
-            headers: {},
-            params: {},
-            cookies: {}
+            query: {
+                additionalProperties: additionalQuery,
+            },
+            headers: {
+                additionalProperties: additionalHeaders,
+            },
+            params: {
+                additionalProperties: additionalParams,
+            },
+            cookies: {
+                additionalProperties: additionalCookies,
+            },
         };
         const reqFields = {
             query: 'query',
