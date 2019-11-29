@@ -21,7 +21,7 @@ module.exports = class ResponseValidator {
         if (!valid) {
             const errors = augumentAjvErrors([...(validator.errors || [])]);
             const message = this._ajv.errorsText(errors, {
-                dataVar: 'request',
+                dataVar: 'response',
             });
             throw new ValidationError(message, 500);
         }
