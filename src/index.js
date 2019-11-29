@@ -28,7 +28,7 @@ module.exports = class OpenApiValidator {
                 const loader = new OpenApiLoader({
                     filePath: this.apiSpec,
                 });
-                this.apiDoc = loader.docJson;
+                this.apiDoc = await loader.getDoc();
                 this.event = event;
     
                 const { paths } = this.apiDoc;
