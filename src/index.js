@@ -1,8 +1,7 @@
-const pick = require('lodash/pick');
-
 const OpenApiLoader = require('./openApiLoader');
 const RequestValidator = require('./openApiRequestValidator');
 const { ValidationError } = require('./errors');
+const { TYPE_JSON } = require('./constants');
 
 module.exports = class OpenApiValidator {
     constructor(params, lambdaBody) {
@@ -10,8 +9,8 @@ module.exports = class OpenApiValidator {
             throw Error('Missing requred API spec path');
         }
         this.apiSpec = params.apiSpec;
-        this.allowUnknownProperties = params.allowUnknownProperties || false;
-        this.contentType = params.contentType || 'application/json';
+        this.additonalProperties = params.additonalProperties || false;
+        this.contentType = params.contentType || TYPE_JSON;
         this.validateRequests = params.validateRequests || false;
         this.validateResponses = params.validateResponses || false;
         this.requestBodyTransformer = params.requestBodyTransformer;
@@ -43,7 +42,7 @@ module.exports = class OpenApiValidator {
                 const httpMethodLower = httpMethod.toLowerCase();
     
                 if (!paths[path] || !paths[path][httpMethodLower]) {
-                    throw ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
+                    throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
                 }
                 this.config = paths[path][httpMethodLower];
     
@@ -79,19 +78,10 @@ module.exports = class OpenApiValidator {
                     statusCode: 200,
                 });
             } catch (error) {
-                console.log(error);
-                if (typeof(error) === ValidationError) {
-                    callback(null, {
-                        message: error.message,
-                        statusCode: error.statusCode || 500,
-                    });
-                }
-                else {
-                    callback(null, {
-                        message: error.message,
-                        statusCode: 500,
-                    });
-                }
+                callback(null, {
+                    message: error.message,
+                    statusCode: error.statusCode || 500,
+                });
             }
 
         }
@@ -104,23 +94,16 @@ module.exports = class OpenApiValidator {
                 {
                     nullable: true,
                     removeAdditional: false,
-                    allowUnknownProperties: this.allowUnknownProperties,
+                    additonalProperties: this.additonalProperties,
                 },
                 schema);
-            requestValidator.validate(path, event, schema)
-            //    const errors = [];
-            //    if (this.config.requestBody) {
-
-            //    }
-            //    if (this.config.queryStringParameters) {
-
-            //    }
-            //    if (this.config.paramParameters) {
-
-            //    }
-            //    if (errors.length) {
-            //        throw Error(JSON.stringify(errors));
-            //    }
+            const request = {
+                body: (event.body && JSON.parse(event.body)) || {},
+                query: event.queryStringParameters || {},
+                headers: event.headers || {},
+                params: event.pathParameters || {},
+            }
+            requestValidator.validate(path, request, schema);
         }
     }
 }

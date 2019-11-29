@@ -1,7 +1,9 @@
 const { Ajv } = require('ajv');
-const { createRequestAjv } = require('./middleware/ajv');
 
+const { createRequestAjv } = require('./middleware/ajv');
+const { augumentAjvErrors } = require('./utils');
 const { ValidationError } = require('./errors');
+const { TYPE_JSON } = require('./constants');
 
 module.exports = class RequestValidator {
     constructor(apiDoc, options, schema) {
@@ -11,110 +13,85 @@ module.exports = class RequestValidator {
         this._ajv = createRequestAjv(apiDoc, options);
     }
 
-    validate (path, request, schema, contentType = 'application/json') {
-        // const parameters = this.parametersToSchema(path, schema);
-        // console.log(parameters)
+    validate(path, request, schema, options = {}) {
+        const {
+            requestBody,
+            parameters
+        } = schema;
+        const contentType = options.contentType || TYPE_JSON;
 
-        // let requestBody = request.body;
-        // if (requestBody && requestBody.hasOwnProperty('$ref')) {
-        //     const ref = requestBody.$ref;
-        //     const id = ref.replace(/^.+\//i, '');
-        //     requestBody = this._apiDoc.components.requestBodies[id];
-        // }
+        const params = this.parametersToSchema(parameters);
 
-        // let body = {};
-        // const requiredAdds = [];
-        // if (requestBody && requestBody.hasOwnProperty('content')) {
-        //     const reqBodyObject = requestBody;
-        //     body = this.requestBodyToSchema(path, contentType, reqBodyObject);
-        //     if (reqBodyObject.required) requiredAdds.push('body');
-        // }
+        let body = {};
+        const requiredAdds = [];
+        if (requestBody && requestBody.hasOwnProperty('content')) {
+            const reqBodyObject = requestBody;
+            body = this.requestBodyToSchema(path, contentType, requestBody);
+            if (requestBody.required) requiredAdds.push('body');
+        }
 
-        // const schema = {
-        //     // $schema: "http://json-schema.org/draft-04/schema#",
-        //     required: ['query', 'headers', 'params'].concat(requiredAdds),
-        //     properties: {
-        //         body,
-        //         ...parameters.schema,
-        //     },
-        // };
+        const apiSchema = {
+            required: ['query', 'headers', 'params'].concat(requiredAdds),
+            properties: {
+                body,
+                query: {},
+                headers: {},
+                params: {},
+            },
+        };
 
-        const validator = this._ajv.compile(schema);
-        // return (req, res, next) => {
-        //     if (!this._options.allowUnknownProperties) {
-        //         this.rejectUnknownQueryParams(req.query, schema.properties.query, securityQueryParameter);
-        //     }
+        const validator = this._ajv.compile(apiSchema);
 
-        //     const openapi = req.openapi;
-        //     const shouldUpdatePathParams = Object.keys(openapi.pathParams).length > 0;
+        /**
+         * support json in request params, query, headers and cookies
+         * like this filter={"type":"t-shirt","color":"blue"}
+         *
+         * https://swagger.io/docs/specification/describing-parameters/#schema-vs-content
+         */
+        params.parseJson.forEach(item => {
+            if (request[item.reqField] && request[item.reqField][item.name]) {
+                request[item.reqField][item.name] = JSON.parse(
+                    request[item.reqField][item.name],
+                );
+            }
+        });
 
-        //     if (shouldUpdatePathParams) {
-        //         req.params = openapi.pathParams || req.params;
-        //     }
+        /**
+         * array deserialization
+         * filter=foo,bar,baz
+         * filter=foo|bar|baz
+         * filter=foo%20bar%20baz
+         */
+        params.parseArray.forEach(item => {
+            if (request[item.reqField] && request[item.reqField][item.name]) {
+                request[item.reqField][item.name] = request[item.reqField][item.name].split(
+                    item.delimiter,
+                );
+            }
+        });
 
-        //     // (<any>req).schema = schema;
+        /**
+         * forcing convert to array if scheme describes param as array + explode
+         */
+        params.parseArrayExplode.forEach(item => {
+            if (
+                request[item.reqField] &&
+                request[item.reqField][item.name] &&
+                !(request[item.reqField][item.name] instanceof Array)
+            ) {
+                request[item.reqField][item.name] = [request[item.reqField][item.name]];
+            }
+        });
 
-        //     /**
-        //      * support json in request params, query, headers and cookies
-        //      * like this filter={"type":"t-shirt","color":"blue"}
-        //      *
-        //      * https://swagger.io/docs/specification/describing-parameters/#schema-vs-content
-        //      */
-        //     parameters.parseJson.forEach(item => {
-        //         if (req[item.reqField] && req[item.reqField][item.name]) {
-        //             req[item.reqField][item.name] = JSON.parse(
-        //                 req[item.reqField][item.name],
-        //             );
-        //         }
-        //     });
+        const valid = validator(request);
 
-        //     /**
-        //      * array deserialization
-        //      * filter=foo,bar,baz
-        //      * filter=foo|bar|baz
-        //      * filter=foo%20bar%20baz
-        //      */
-        //     parameters.parseArray.forEach(item => {
-        //         if (req[item.reqField] && req[item.reqField][item.name]) {
-        //             req[item.reqField][item.name] = req[item.reqField][item.name].split(
-        //                 item.delimiter,
-        //             );
-        //         }
-        //     });
-
-        //     /**
-        //      * forcing convert to array if scheme describes param as array + explode
-        //      */
-        //     parameters.parseArrayExplode.forEach(item => {
-        //         if (
-        //             req[item.reqField] &&
-        //             req[item.reqField][item.name] &&
-        //             !(req[item.reqField][item.name] instanceof Array)
-        //         ) {
-        //             req[item.reqField][item.name] = [req[item.reqField][item.name]];
-        //         }
-        //     });
-
-        //     const reqToValidate = {
-        //         ...req,
-        //         cookies: req.cookies ? {
-        //             ...req.cookies,
-        //             ...req.signedCookies
-        //         } : undefined,
-        //     };
-        //     const valid = validator(reqToValidate);
-        //     if (valid) {
-        //         next();
-        //     } else {
-        //         // TODO look into Ajv async errors plugins
-        //         const errors = augmentAjvErrors([...(validator.errors || [])]);
-        //         const err = ajvErrorsToValidatorError(400, errors);
-        //         const message = this.ajv.errorsText(errors, {
-        //             dataVar: 'request'
-        //         });
-        //         throw ono(err, message);
-        //     }
-        // };
+        if (!valid) {
+            const errors = augumentAjvErrors([...(validator.errors || [])]);
+            const message = this._ajv.errorsText(errors, {
+                dataVar: 'request',
+            });
+            throw new ValidationError(message, 415);
+        }
     }
 
     getSecurityQueryParams(usedSecuritySchema, securitySchema) {
@@ -126,11 +103,10 @@ module.exports = class RequestValidator {
                 return securitySchema[securityKey];
             })
             .filter(sec => sec && sec.in && sec.in === 'query')
-            .map(sec => sec.name) :
-            [];
+            .map(sec => sec.name) : [];
     }
 
-    parametersToSchema (path, parameters = []) {
+    parametersToSchema(parameters = []) {
         const schema = {
             query: {},
             headers: {},
@@ -165,7 +141,7 @@ module.exports = class RequestValidator {
             const reqField = reqFields[$in];
             if (!reqField) {
                 const message = `Parameter 'in' has incorrect value '${$in}' for [${parameter.name}]`;
-                throw ValidationError(message, 400);
+                throw new ValidationError(message, 400);
             }
 
             let parameterSchema = parameter.schema;
@@ -179,7 +155,7 @@ module.exports = class RequestValidator {
 
             if (!parameterSchema) {
                 const message = `No available parameter 'schema' or 'content' for [${parameter.name}]`;
-                throw ValidationError(message, 400);
+                throw new ValidationError(message, 400);
             }
 
             if (
@@ -190,7 +166,7 @@ module.exports = class RequestValidator {
                 const delimiter = arrayDelimiter[parameter.style];
                 if (!delimiter) {
                     const message = `Parameter 'style' has incorrect value '${parameter.style}' for [${parameter.name}]`;
-                    throw ValidationError(message, 400);
+                    throw new ValidationError(message, 400);
                 }
                 parseArray.push({
                     name,
@@ -234,15 +210,15 @@ module.exports = class RequestValidator {
         };
     }
 
-    requestBodyToSchema (path, contentType, requestBody) {
+    requestBodyToSchema(path, contentType, requestBody) {
         if (requestBody.content) {
-            const content = requestBody.content[type];
+            const content = requestBody.content[contentType];
 
             if (!content) {
-                const message = !contentType == null
-                    ? 'media type not specified'
-                    : `unsupported media type ${contentType.contentType}`;
-                throw ValidationError(message, 415);
+                const message = !contentType == null ?
+                    'media type not specified' :
+                    `unsupported media type ${contentType.contentType}`;
+                throw new ValidationError(message, 415);
             }
 
             const schema = this.cleanseContentSchema(contentType, requestBody);
@@ -251,51 +227,53 @@ module.exports = class RequestValidator {
         return {};
     }
 
-    cleanseContentSchema (contentType, requestBody) {
+    cleanseContentSchema(contentType, requestBody) {
         const bodyContentSchema =
-          requestBody.content[contentType] &&
-          requestBody.content[contentType].schema;
-    
+            requestBody.content[contentType] &&
+            requestBody.content[contentType].schema;
+
         let bodyContentRefSchema = null;
         if (bodyContentSchema && '$ref' in bodyContentSchema) {
-          const objectSchema = this.ajv.getSchema(bodyContentSchema.$ref);
-          bodyContentRefSchema =
-            objectSchema &&
-            objectSchema.schema &&
-            objectSchema.schema.properties
-              ? { ...objectSchema.schema }
-              : null;
+            const objectSchema = this._ajv.getSchema(bodyContentSchema.$ref);
+            bodyContentRefSchema =
+                objectSchema &&
+                objectSchema.schema &&
+                objectSchema.schema.properties ?
+                {
+                    ...objectSchema.schema
+                } :
+                null;
         }
         // handle readonly / required request body refs
         // don't need to copy schema if validator gets its own copy of the api spec
         // currently all middlware i.e. req and res validators share the spec
         const schema = bodyContentRefSchema || bodyContentSchema;
         if (schema && schema.properties) {
-          Object.keys(schema.properties).forEach(prop => {
-            const propertyValue = schema.properties[prop];
-            const required = schema.required;
-            if (propertyValue.readOnly && required) {
-              const index = required.indexOf(prop);
-              if (index > -1) {
-                schema.required = required
-                  .slice(0, index)
-                  .concat(required.slice(index + 1));
-              }
-            }
-          });
-          return schema;
+            Object.keys(schema.properties).forEach(prop => {
+                const propertyValue = schema.properties[prop];
+                const required = schema.required;
+                if (propertyValue.readOnly && required) {
+                    const index = required.indexOf(prop);
+                    if (index > -1) {
+                        schema.required = required
+                            .slice(0, index)
+                            .concat(required.slice(index + 1));
+                    }
+                }
+            });
+            return schema;
         }
     }
 
-    rejectUnknownQueryParams (query, schema, whiteList = []) {
+    rejectUnknownQueryParams(query, schema, whiteList = []) {
         if (!schema.properties) return;
         const knownQueryParams = new Set(Object.keys(schema.properties));
         whiteList.forEach(item => knownQueryParams.add(item));
         const queryParams = Object.keys(query);
         for (const q of queryParams) {
-          if (!knownQueryParams.has(q)) {
-            throw ValidationError(`Unknown query parameter ${q}`, 400);
-          }
+            if (!knownQueryParams.has(q)) {
+                throw new ValidationError(`Unknown query parameter ${q}`, 400);
+            }
         }
-      }
+    }
 }
