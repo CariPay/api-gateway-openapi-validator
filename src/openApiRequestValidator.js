@@ -14,13 +14,16 @@ module.exports = class RequestValidator {
     }
 
     validate(path, request, schema, options = {}) {
-        const {
-            requestBody,
-            parameters
-        } = schema;
+        let { requestBody } = schema;
+        const { parameters } = schema;
+
         const contentType = options.contentType || TYPE_JSON;
 
-        const params = this.parametersToSchema(parameters);
+        if (requestBody && requestBody.hasOwnProperty('$ref')) {
+            const ref = requestBody.$ref;
+            const id = ref.replace(/^.+\//i, '');
+            requestBody = this._apiDocs.components.requestBodies[id];
+        }
 
         let body = {};
         const requiredAdds = [];
@@ -29,6 +32,8 @@ module.exports = class RequestValidator {
             body = this.requestBodyToSchema(path, contentType, requestBody);
             if (requestBody.required) requiredAdds.push('body');
         }
+
+        const params = this.parametersToSchema(parameters);
 
         const additionalBody = this._options.additionalProperties.body || false;
 
