@@ -9,7 +9,7 @@ module.exports = class OpenApiValidator {
             throw Error('Missing requred API spec path');
         }
         this.apiSpec = params.apiSpec;
-        this.additonalProperties = params.additonalProperties || false;
+        this.additionalProperties = params.additionalProperties || {};
         this.contentType = params.contentType || TYPE_JSON;
         this.validateRequests = params.validateRequests || false;
         this.validateResponses = params.validateResponses || false;
@@ -94,7 +94,7 @@ module.exports = class OpenApiValidator {
                 {
                     nullable: true,
                     removeAdditional: false,
-                    additonalProperties: this.additonalProperties,
+                    additionalProperties: this.additionalProperties,
                 },
                 schema);
             const request = {
@@ -102,7 +102,7 @@ module.exports = class OpenApiValidator {
                 query: event.queryStringParameters || {},
                 headers: event.headers || {},
                 params: event.pathParameters || {},
-            }
+            };
             requestValidator.validate(path, request, schema);
         }
     }
