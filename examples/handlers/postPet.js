@@ -1,4 +1,4 @@
-const OpenApiValidator = require('src/index');
+const OpenApiValidator = require('dist/index');
 
 /**
  *
@@ -21,13 +21,7 @@ exports.lambdaHandler = new OpenApiValidator(
     },
     async (event, context) => {
         try {
-            const response = {
-                'statusCode': 200,
-                'body': JSON.stringify({
-                    message: 'hello world',
-                })
-            }
-            return response;
+            return JSON.parse(event.body);
         } catch (err) {
             console.log(err);
             return err;
