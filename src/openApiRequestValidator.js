@@ -287,16 +287,4 @@ module.exports = class RequestValidator {
             return schema;
         }
     }
-
-    rejectUnknownQueryParams(query, schema, whiteList = []) {
-        if (!schema.properties) return;
-        const knownQueryParams = new Set(Object.keys(schema.properties));
-        whiteList.forEach(item => knownQueryParams.add(item));
-        const queryParams = Object.keys(query);
-        for (const q of queryParams) {
-            if (!knownQueryParams.has(q)) {
-                throw new ValidationError(`Unknown query parameter ${q}`, 400);
-            }
-        }
-    }
 }
