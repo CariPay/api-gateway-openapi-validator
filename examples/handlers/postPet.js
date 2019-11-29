@@ -1,4 +1,4 @@
-const OpenApiValidator = require('dist/index');
+const OpenApiValidator = require('src/index');
 
 /**
  *
@@ -18,10 +18,19 @@ exports.lambdaHandler = new OpenApiValidator(
     {
         apiSpec: 'examples/swagger.json',
         validateRequests: true,
+        validateResponses: true,
+        responseSuccessTransformer: (response, statusCode) => ({
+            data: response,
+            statusCode,
+        }),
+        responseErrorTransformer: (response, statusCode, message) => ({
+            message: message,
+            statusCode,
+        }),
     },
     async (event, context) => {
         try {
-            return JSON.parse(event.body);
+            return [ JSON.parse(event.body), 200 ];
         } catch (err) {
             console.log(err);
             return err;

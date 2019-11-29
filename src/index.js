@@ -1,5 +1,6 @@
 const OpenApiLoader = require('./openApiLoader');
 const RequestValidator = require('./openApiRequestValidator');
+const ResponseValidator = require('./openApiResponseValidator');
 const { ValidationError } = require('./errors');
 const { TYPE_JSON } = require('./constants');
 
@@ -16,7 +17,8 @@ module.exports = class OpenApiValidator {
         this.requestBodyTransformer = params.requestBodyTransformer;
         this.requestPathTransformer = params.requestPathTransformer;
         this.requestQueryTransformer = params.requestQueryTransformer;
-        this.responseTransformer = params.responseTransformer;
+        this.responseSuccessTransformer = params.responseSuccessTransformer;
+        this.responseErrorTransformer = params.responseErrorTransformer;
         this.apiDoc = {}
         this.config = {};
         this.lambdaBody = lambdaBody;
@@ -64,19 +66,24 @@ module.exports = class OpenApiValidator {
                     this.event.queryStringParameters = transformedQuery;
                 }
     
-                let response = await this.lambdaBody(event, context, callback);
+                const lambdaResponse = await this.lambdaBody(event, context, callback);
+                // Response from lambda should return an array containing the response and statusCode
+                // It is expected that the lambda handles errors accordingly to return the correct status code and response
+                let [ response, statusCode, message='' ] = lambdaResponse;
     
-                if (this.responseTransformer) {
-                    const transformedResponse = this.requestTransformer(response);
-                    response = {
-                        ...response,
-                        ...transformedResponse,
-                    };
+                // Informational and Success responses use the success transformer
+                if (statusCode < 300 && this.responseSuccessTransformer) {
+                    response = this.responseSuccessTransformer(response, statusCode);
+                } else if (this.responseErrorTransformer) {
+                    response = this.responseErrorTransformer(response, statusCode, message);
                 }
-                callback(null, {
-                    body: response,
-                    statusCode: 200,
-                });
+    
+
+                if (this.validateResponses) {
+                    this._validateResponses(path, response, this.config, statusCode);
+                }
+
+                callback(null, response);
             } catch (error) {
                 callback(null, {
                     message: error.message,
@@ -92,8 +99,6 @@ module.exports = class OpenApiValidator {
             const requestValidator = new RequestValidator(
                 this.apiDoc,
                 {
-                    nullable: true,
-                    removeAdditional: false,
                     additionalProperties: this.additionalProperties,
                 },
                 schema);
@@ -104,6 +109,18 @@ module.exports = class OpenApiValidator {
                 params: event.pathParameters || {},
             };
             requestValidator.validate(path, request);
+        }
+    }
+
+    _validateResponses (path, response, schema, statusCode) {
+        if (schema) {
+            const responseValidator = new ResponseValidator(
+                this.apiDoc,
+                {
+                    additionalProperties: this.additionalProperties,
+                },
+                schema);
+            responseValidator.validate(path, response, statusCode);
         }
     }
 }
