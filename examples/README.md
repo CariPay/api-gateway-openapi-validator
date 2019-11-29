@@ -1,17 +1,14 @@
-# test
+# Examples
 
-This is a sample template for test - Below is a brief explanation of what we have generated for you:
+This is a sample template for examples - Below is a brief explanation of what we have generated for you:
 
 ```bash
 .
 ├── README.MD                   <-- This instructions file
-├── event.json                  <-- API Gateway Proxy Integration event payload
-├── hello_world                 <-- Source code for a lambda function
-│   └── app.js                  <-- Lambda function code
-│   └── package.json            <-- NodeJS dependencies and scripts
-│   └── tests                   <-- Unit tests
-│       └── unit
-│           └── test-handler.js
+├── app.js                      <-- NodeJS dependencies and scripts
+├── events                      <-- Configuration files for API gateway events
+│   └── postPet.json            <-- API Gateway Proxy Integration event payload
+├── package.json                <-- NodeJS dependencies and scripts payload
 ├── template.yaml               <-- SAM template
 ```
 
@@ -29,7 +26,7 @@ This is a sample template for test - Below is a brief explanation of what we hav
 **Invoking function locally using a local sample payload**
 
 ```bash
-sam local invoke HelloWorldFunction --event event.json
+sam local invoke ExampleFunction --event events/postPet.json
 ```
  
 **Invoking function locally through local API Gateway**
@@ -45,11 +42,11 @@ If the previous command ran successfully you should now be able to hit the follo
 ```yaml
 ...
 Events:
-    HelloWorld:
+    PostPet:
         Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
         Properties:
-            Path: /hello
-            Method: get
+            Path: /pet
+            Method: post
 ```
 
 ## Packaging and deployment
@@ -58,10 +55,10 @@ AWS Lambda NodeJS runtime requires a flat folder with all dependencies including
 
 ```yaml
 ...
-    HelloWorldFunction:
+    ExampleFunction:
         Type: AWS::Serverless::Function
         Properties:
-            CodeUri: hello-world/
+            CodeUri: ../
             ...
 ```
 
@@ -95,7 +92,7 @@ After deployment is complete you can run the following command to retrieve the A
 ```bash
 aws cloudformation describe-stacks \
     --stack-name test \
-    --query 'Stacks[].Outputs[?OutputKey==`HelloWorldApi`]' \
+    --query 'Stacks[].Outputs[?OutputKey==`PetStoreApi`]' \
     --output table
 ``` 
 
@@ -106,20 +103,10 @@ To simplify troubleshooting, SAM CLI has a command called sam logs. sam logs let
 `NOTE`: This command works for all AWS Lambda functions; not just the ones you deploy using SAM.
 
 ```bash
-sam logs -n HelloWorldFunction --stack-name test --tail
+sam logs -n ExampleFunction --stack-name test --tail
 ```
 
 You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
-
-## Testing
-
-We use `mocha` for testing our code and it is already added in `package.json` under `scripts`, so that we can simply run the following command to run our tests:
-
-```bash
-cd hello-world
-npm install
-npm run test
-```
 
 ## Cleanup
 
@@ -137,7 +124,7 @@ Here are a few things you can try to get more acquainted with building serverles
 
 * Uncomment lines on `app.js`
 * Build the project with ``sam build --use-container``
-* Invoke with ``sam local invoke HelloWorldFunction --event event.json``
+* Invoke with ``sam local invoke ExampleFunction --event event.json``
 * Update tests
 
 ### Create an additional API resource
@@ -175,7 +162,7 @@ All commands used throughout this document
 
 ```bash
 # Invoke function locally with event.json as an input
-sam local invoke HelloWorldFunction --event event.json
+sam local invoke ExampleFunction --event event.json
 
 # Run API Gateway locally
 sam local start-api
@@ -197,11 +184,11 @@ sam deploy \
 # Describe Output section of CloudFormation stack previously created
 aws cloudformation describe-stacks \
     --stack-name test \
-    --query 'Stacks[].Outputs[?OutputKey==`HelloWorldApi`]' \
+    --query 'Stacks[].Outputs[?OutputKey==`PetStoreApi`]' \
     --output table
 
 # Tail Lambda function Logs using Logical name defined in SAM Template
-sam logs -n HelloWorldFunction --stack-name test --tail
+sam logs -n ExampleFunction --stack-name test --tail
 ```
 
 **NOTE**: Alternatively this could be part of package.json scripts section.
