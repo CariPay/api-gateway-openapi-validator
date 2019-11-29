@@ -7,11 +7,16 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "example": "node ./examples/index.js"
+    "develop": "webpack --config webpack.config.js --mode development --watch",
+    "build": "webpack --config webpack.config.js --mode production"
   },
   "dependencies": {
     "ajv": "^6.10.2",
     "json-schema-ref-parser": "^7.1.2",
     "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
   }
 }
