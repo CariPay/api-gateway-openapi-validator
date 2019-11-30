@@ -19,7 +19,7 @@ module.exports = class ResponseValidator {
         
         const valid = validators[statusCode](response);
         if (!valid) {
-            const errors = augumentAjvErrors([...(validator.errors || [])]);
+            const errors = augumentAjvErrors([...(validators[statusCode].errors || [])]);
             const message = this._ajv.errorsText(errors, {
                 dataVar: 'response',
             });
@@ -43,12 +43,7 @@ module.exports = class ResponseValidator {
           }
           const schema = response.content[TYPE_JSON].schema;
           schemas[name] = {
-            type: 'object',
-            properties: {
-              response: schema,
-            },
-            components: this._apiDoc.components || {},
-            additionalProperties: this._options.additionalProperties,
+            ...schema,
           };
         }
     
