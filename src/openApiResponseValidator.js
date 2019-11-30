@@ -17,7 +17,7 @@ module.exports = class ResponseValidator {
         const { responses } = this._schema;
         const validators = this.buildValidators(responses);
         
-        const valid = validators[statusCode](response);
+        const valid = validators[statusCode]({ response });
         if (!valid) {
             const errors = augumentAjvErrors([...(validators[statusCode].errors || [])]);
             const message = this._ajv.errorsText(errors, {
@@ -42,8 +42,14 @@ module.exports = class ResponseValidator {
             continue;
           }
           const schema = response.content[TYPE_JSON].schema;
+          // Nested schema into response object to avoid having to transform $ref if it is one of the schema's primary keys
           schemas[name] = {
-            ...schema,
+            type: 'object',
+            properties: {
+              response: schema,
+            },
+            components: this._apiDoc.components || {},
+            additionalProperties: this._options.additionalProperties.response || false,
           };
         }
     
