@@ -21,7 +21,7 @@ or
 Attach the following to the dependencies of your package.json.
 ```json
 {
-    "api-gateway-openapi-validator": "https://github.com/CariPay/api-gateway-openapi-validator.git" 
+    "api-gateway-openapi-validator": "git://github.com/CariPay/api-gateway-openapi-validator.git" 
 }
 ```
 
