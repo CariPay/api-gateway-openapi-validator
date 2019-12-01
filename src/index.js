@@ -82,6 +82,8 @@ module.exports = class OpenApiValidator {
                     response = this.responseSuccessTransformer(response, statusCode);
                 } else if (this.responseErrorTransformer) {
                     response = this.responseErrorTransformer(response, statusCode, message);
+                } else {
+                    throw new ValidationError(message, statusCode);
                 }
     
 
