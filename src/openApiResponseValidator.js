@@ -49,7 +49,7 @@ module.exports = class ResponseValidator {
               response: schema,
             },
             components: this._apiDoc.components || {},
-            additionalProperties: this._options.additionalProperties.response || false,
+            additionalProperties: !this._options.removeAdditional || false,
           };
         }
     

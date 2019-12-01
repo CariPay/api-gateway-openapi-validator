@@ -34,15 +34,14 @@ module.exports = class RequestValidator {
         }
 
         const params = this.parametersToSchema(parameters);
-
-        const additionalBody = this._options.additionalProperties.body || false;
+        const additionalProperties = !this._options.removeAdditional || false;
 
         const apiSchema = {
             required: ['query', 'headers', 'params'].concat(requiredAdds),
             properties: {
                 body: {
                     ...body,
-                    additionalProperties: additionalBody,
+                    additionalProperties,
                 },
                 ...params.schema,
             },
@@ -100,6 +99,7 @@ module.exports = class RequestValidator {
             });
             throw new ValidationError(message, 415);
         }
+        return request;
     }
 
     getSecurityQueryParams(usedSecuritySchema, securitySchema) {
@@ -115,25 +115,23 @@ module.exports = class RequestValidator {
     }
 
     parametersToSchema(parameters = []) {
-        const additionalQuery = this._options.additionalProperties.query || false;
-        const additionalParams = this._options.additionalProperties.params || false;
-        const additionalHeaders = this._options.additionalProperties.headers === null
+        const additionalProperties = !this._options.removeAdditional || false;
+        const additionalHeaders = this._options.removeAdditional === undefined
             ? true
-            : this._options.additionalProperties.headers;
-        const additionalCookies = this._options.additionalProperties.cookies || false;
+            : !this._options.removeAdditional;
 
         const schema = {
             query: {
-                additionalProperties: additionalQuery,
+                additionalProperties,
             },
             headers: {
                 additionalProperties: additionalHeaders,
             },
             params: {
-                additionalProperties: additionalParams,
+                additionalProperties,
             },
             cookies: {
-                additionalProperties: additionalCookies,
+                additionalProperties,
             },
         };
         const reqFields = {

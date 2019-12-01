@@ -10,7 +10,6 @@ module.exports = class OpenApiValidator {
             throw Error('Missing requred API spec path');
         }
         this.apiSpec = params.apiSpec;
-        this.additionalProperties = params.additionalProperties || {};
         this.contentType = params.contentType || TYPE_JSON;
         this.validateRequests = params.validateRequests || false;
         this.validateResponses = params.validateResponses || false;
@@ -19,6 +18,9 @@ module.exports = class OpenApiValidator {
         this.requestQueryTransformer = params.requestQueryTransformer;
         this.responseSuccessTransformer = params.responseSuccessTransformer;
         this.responseErrorTransformer = params.responseErrorTransformer;
+        this.removeAdditional = params.removeAdditional === undefined
+            ? false
+            : params.removeAdditional;
         this.apiDoc = {}
         this.config = {};
         this.lambdaBody = lambdaBody;
@@ -50,7 +52,11 @@ module.exports = class OpenApiValidator {
     
                 // Validate Requests
                 if (this.validateRequests) {
-                    this._validateRequests(path, this.event, this.config);
+                    const filteredRequest = this._validateRequests(path, this.event, this.config);
+                    
+                    // Replace the properties of the event with the filtered ones (body, queryParams, pathParams)
+                    Object.assign(this.event, filteredRequest);
+                    console.log(this.event);
                 }
                 // Transform Requests
                 if (this.requestBodyTransformer) {
@@ -80,7 +86,10 @@ module.exports = class OpenApiValidator {
     
 
                 if (this.validateResponses) {
-                    this._validateResponses(path, response, this.config, statusCode);
+                    const filteredResponse = this._validateResponses(path, response, this.config, statusCode);
+
+                    // Replace the content of the response by filtering based on the documentation
+                    Object.assign(response, filteredResponse);
                 }
 
                 callback(null, response);
@@ -99,7 +108,7 @@ module.exports = class OpenApiValidator {
             const requestValidator = new RequestValidator(
                 this.apiDoc,
                 {
-                    additionalProperties: this.additionalProperties,
+                    removeAdditional: this.removeAdditional,
                 },
                 schema);
             const request = {
@@ -109,6 +118,14 @@ module.exports = class OpenApiValidator {
                 params: event.pathParameters || {},
             };
             requestValidator.validate(path, request);
+
+            // Replace the request properties with the values after validation to ensure that the values are filtered
+            return {
+                body: request.body,
+                queryStringParams: request.query,
+                headers: request.headers,
+                pathParameters: request.params,
+            };
         }
     }
 
@@ -117,7 +134,7 @@ module.exports = class OpenApiValidator {
             const responseValidator = new ResponseValidator(
                 this.apiDoc,
                 {
-                    additionalProperties: this.additionalProperties,
+                    removeAdditional: this.removeAdditional,
                 },
                 schema);
             responseValidator.validate(path, response, statusCode);
