@@ -61,7 +61,7 @@ exports.handler = new OpenApiValidator(options, handler).install();
 - options: `<Object>`: Parameters used to customize the validator
 
     - apiSpec: The path to the open api documentation to use for validation (required, must be v3)
-    - additionalProperties: Whether additional properties not contained in the documentations' schema should be accepted for all request types and responses. `Only applies to top level properties in the schema. This can also be set by applying the same property in the schema documentation`. (default: false, true for headers)
+    - removeAdditional: Whether additional properties not contained in the documentation's schema should be accepted and removed for all request types and responses
     - contentType: The default content format used in a request and response (default: application/json)
     - requestBodyTransformer: Function used to transform the body of a request (`argument: body obtained from event.body, returns: transformed response`)
     - requestPathTransformer: Function used to transform the body of a request (`argument: path obtained from event.pathParameters, returns: transformed response`)
