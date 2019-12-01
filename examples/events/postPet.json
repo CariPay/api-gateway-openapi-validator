@@ -1,5 +1,5 @@
 {
-    "body": "{\"id\":10,\"name\":\"doggie\",\"photoUrls\":[\"http:\/\/url1.com\",\"http:\/\/www.url2.com\"],\"status\":\"available\"}",
+    "body": "{\"id\":10,\"name\":\"doggie\",\"message\":\"hello world\",\"photoUrls\":[\"http:\/\/url1.com\",\"http:\/\/www.url2.com\"],\"status\":\"available\"}",
     "path": "/pet",
     "httpMethod": "POST",
     "isBase64Encoded": false,

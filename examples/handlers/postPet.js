@@ -19,10 +19,11 @@ exports.lambdaHandler = new OpenApiValidator(
         apiSpec: 'examples/swagger.json',
         validateRequests: true,
         validateResponses: true,
+        removeAdditional: true,
     },
     async (event, context) => {
         try {
-            return [ JSON.parse(event.body), 200 ];
+            return [ event.body, 200 ];
         } catch (err) {
             console.log(err);
             return err;
