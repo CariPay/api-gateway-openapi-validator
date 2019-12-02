@@ -37,8 +37,9 @@ module.exports = class OpenApiValidator {
                 });
                 this.apiDoc = await loader.getDoc();
 
-                // Event body is in a string format by default, need to convert to JSON
-                event.body = JSON.parse(event.body);
+                if (isJson(event.body)) {
+                    event.body = JSON.parse(event.body);
+                }
                 this.event = event;
     
                 const { paths } = this.apiDoc;
