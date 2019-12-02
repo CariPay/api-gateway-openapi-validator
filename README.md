@@ -77,7 +77,7 @@ exports.handler = new OpenApiValidator(options, handler).install();
         ```js
         // Example
         return {
-            body: transformedResponse,
+            body: JSON.stringify(transformedResponse),
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': true,
