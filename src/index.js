@@ -34,6 +34,9 @@ module.exports = class OpenApiValidator {
                     filePath: this.apiSpec,
                 });
                 this.apiDoc = await loader.getDoc();
+
+                // Event body is in a string format by default, need to convert to JSON
+                event.body = JSON.parse(event.body);
                 this.event = event;
     
                 const { paths } = this.apiDoc;
@@ -134,7 +137,7 @@ module.exports = class OpenApiValidator {
                 },
                 schema);
             const request = {
-                body: (event.body && JSON.parse(event.body)) || {},
+                body: event.body || {},
                 query: event.queryStringParameters || {},
                 headers: event.headers || {},
                 params: event.pathParameters || {},
