@@ -11,6 +11,26 @@ const createResponseAjv = (openApiSpec, options={}) => {
   return createAjv(openApiSpec, options, false);
 }
 
+const getValidateFunction = (keyword, message, deleteProp=false) => {
+  return function validate(data, path, obj, propName) {
+    const isValid = !(sch === true && data != null);
+    if (deleteProp) {
+      delete obj[propName];
+    }
+    validate.errors = [
+      {
+        keyword,
+        dataPath: path,
+        message,
+        params: {
+          [keyword]: propName
+        },
+      },
+    ];
+    return isValid;
+  }
+};
+
 const createAjv = (openApiSpec, options = {}, request=true) => {
   const ajv = new Ajv({
     ...options,
@@ -30,21 +50,8 @@ const createAjv = (openApiSpec, options = {}, request=true) => {
       modifying: true,
       compile: sch => {
         if (sch) {
-          return function validate(data, path, obj, propName) {
-            const isValid = !(sch === true && data != null);
-            delete obj[propName];
-            validate.errors = [
-              {
-                keyword: 'readOnly',
-                dataPath: path,
-                message: `is read-only`,
-                params: { readOnly: propName },
-              },
-            ];
-            return isValid;
-          };
+          return getValidateFunction('readOnly', 'is read-only', true);
         }
-
         return () => true;
       },
     });
@@ -55,20 +62,8 @@ const createAjv = (openApiSpec, options = {}, request=true) => {
       modifying: true,
       compile: sch => {
         if (sch) {
-          return function validate(data, path, obj, propName) {
-            const isValid = !(sch === true && data != null);
-            validate.errors = [
-              {
-                keyword: 'writeOnly',
-                dataPath: path,
-                message: `is write-only`,
-                params: { writeOnly: propName },
-              },
-            ];
-            return isValid;
-          };
+          return getValidateFunction('writeOnly', 'is write-only');
         }
-
         return () => true;
       },
     });
