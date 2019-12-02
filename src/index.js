@@ -78,8 +78,10 @@ module.exports = class OpenApiValidator {
                 let [ response, statusCode, message='' ] = lambdaResponse;
     
                 // Informational and Success responses use the success transformer
-                if (statusCode < 300 && this.responseSuccessTransformer) {
-                    response = this.responseSuccessTransformer(response, statusCode);
+                if (statusCode < 300) {
+                    if (this.responseSuccessTransformer) {
+                        response = this.responseSuccessTransformer(response, statusCode);
+                    }
                 } else if (this.responseErrorTransformer) {
                     response = this.responseErrorTransformer(response, statusCode, message);
                 } else {
