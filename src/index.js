@@ -93,9 +93,10 @@ module.exports = class OpenApiValidator {
                     // Replace the content of the response by filtering based on the documentation
                     Object.assign(response, filteredResponse);
                 }
-
+                console.log(response);
                 callback(null, response);
             } catch (error) {
+                console.log(error);
                 callback(null, {
                     message: error.message,
                     statusCode: error.statusCode || 500,
