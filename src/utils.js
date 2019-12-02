@@ -11,6 +11,17 @@ const augumentAjvErrors = (errors=[]) => {
     return errors;
 };
 
+const isJson = (str) => {
+  try {
+    const jsonStr = JSON.parse(str);
+    return true;
+  } catch (error) {
+    return typeof(str) === 'object';
+  }
+  return false;
+};
+
 module.exports = {
-    augumentAjvErrors,
+  augumentAjvErrors,
+  isJson,
 };

@@ -2,6 +2,7 @@ const OpenApiLoader = require('./openApiLoader');
 const RequestValidator = require('./openApiRequestValidator');
 const ResponseValidator = require('./openApiResponseValidator');
 const { ValidationError } = require('./errors');
+const { isJson } = require('./utils');
 const { TYPE_JSON } = require('./constants');
 
 module.exports = class OpenApiValidator {
@@ -56,7 +57,6 @@ module.exports = class OpenApiValidator {
                     
                     // Replace the properties of the event with the filtered ones (body, queryParams, pathParams)
                     Object.assign(this.event, filteredRequest);
-                    console.log(this.event);
                 }
                 // Transform Requests
                 if (this.requestBodyTransformer) {
@@ -81,26 +81,43 @@ module.exports = class OpenApiValidator {
                 if (statusCode < 300) {
                     if (this.responseSuccessTransformer) {
                         response = this.responseSuccessTransformer(response, statusCode);
+                    } else {
+                        response = this._constructDefaultResponse(response, statusCode);
+                        
                     }
                 } else if (this.responseErrorTransformer) {
                     response = this.responseErrorTransformer(response, statusCode, message);
                 } else {
                     throw new ValidationError(message, statusCode);
                 }
+
+                // All responses require a body and statusCode where the body contains the response data
+                if (!response.hasOwnProperty('body') || !response.hasOwnProperty('statusCode')) {
+                    throw ValidationError('Response must contain a body and statusCode');
+                }
     
+                const responseBody = response.body;
+
+                // Convert body to json if it's a string in json format in order to validate, else use the default value
+                let responseToValidate = responseBody;
+                let converted = false;
+
+                if (isJson(responseBody)) {
+                    responseToValidate = JSON.parse(responseBody);
+                    converted = true;
+                }
 
                 if (this.validateResponses) {
-                    const filteredResponse = this._validateResponses(path, response, this.config, statusCode);
-
+                    const filteredResponse = this._validateResponses(path, responseToValidate, this.config, statusCode);
                     // Replace the content of the response by filtering based on the documentation
-                    Object.assign(response, filteredResponse);
+                    Object.assign(response, { body: converted ? JSON.stringify(filteredResponse) : filteredResponse });
                 }
                 
                 callback(null, response);
             } catch (error) {
                 console.log(error);
                 callback(null, {
-                    message: error.message,
+                    body: JSON.stringify({ message: error.message }),
                     statusCode: error.statusCode || 500,
                 });
             }
@@ -124,6 +141,8 @@ module.exports = class OpenApiValidator {
             };
             requestValidator.validate(path, request);
 
+            // @NOTE: ajv validator replaces the request with the sanitized data
+
             // Replace the request properties with the values after validation to ensure that the values are filtered
             return {
                 body: request.body,
@@ -143,6 +162,17 @@ module.exports = class OpenApiValidator {
                 },
                 schema);
             responseValidator.validate(path, response, statusCode);
+
+            // @NOTE: ajv validator replaces the response with the sanitized data
+            return response;
         }
+    }
+
+    _constructDefaultResponse (response, statusCode) {
+        const body = isJson(response) ? JSON.stringify(response) : response;
+        return {
+            body,
+            statusCode,
+        };
     }
 }
