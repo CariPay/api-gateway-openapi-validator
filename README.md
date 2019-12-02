@@ -85,6 +85,9 @@ exports.handler = new OpenApiValidator(options, handler).install();
             statusCode: 200,
         }
         ```
+    - validateSpec: Whether or not to validate the api spec before being used in other parts in the validator. (`default: true`)
+    ***
+    Note: Unvalidated spec can decrease the security of the validator. Only set `validateSpec to false` if you have verified that the spec is indeed a validated openapi v3 document before being used. View more here: https://www.npmjs.com/package/ajv#security-considerations
 - handler: `<Function>`: Main functionality of the API code
     #### Arguments
     - event: Provides information about the request (path, headers, body, etc)

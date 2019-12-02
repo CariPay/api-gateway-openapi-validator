@@ -17,6 +17,7 @@ const OpenApiValidator = require('src/index');
 exports.lambdaHandler = new OpenApiValidator(
     {
         apiSpec: 'examples/swagger.json',
+        validateSpec: false, // Setting to false since we have verified that the api spec being used is indeed valid v3 open api spec
         validateRequests: true,
         validateResponses: true,
         removeAdditional: true,

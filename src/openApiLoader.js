@@ -23,11 +23,13 @@ module.exports = class OpenApiLoader {
     async getDoc () {
         const fileContent = await this._loadDoc(this._options.filePath);
 
-        const validator = new OpenAPISchemaValidator({
-            version: fileContent.openapi,
-        });
-        if (validator.validate(fileContent).errors.length) {
-            throw new Error('Provided API specification is not valid');
+        if (this._options.validateSpec) {
+            const validator = new OpenAPISchemaValidator({
+                version: fileContent.openapi,
+            });
+            if (validator.validate(fileContent).errors.length) {
+                throw new Error('Provided API specification is not valid');
+            }
         }
         return fileContent;
     }

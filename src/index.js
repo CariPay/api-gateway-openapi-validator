@@ -12,6 +12,7 @@ module.exports = class OpenApiValidator {
         }
         this.apiSpec = params.apiSpec;
         this.contentType = params.contentType || TYPE_JSON;
+        this.validateSpec = params.validateSpec || true;
         this.validateRequests = params.validateRequests || false;
         this.validateResponses = params.validateResponses || false;
         this.requestBodyTransformer = params.requestBodyTransformer;
@@ -32,6 +33,7 @@ module.exports = class OpenApiValidator {
             try {
                 const loader = new OpenApiLoader({
                     filePath: this.apiSpec,
+                    validateSpec: this.validateSpec,
                 });
                 this.apiDoc = await loader.getDoc();
 
