@@ -21,7 +21,7 @@ or
 Attach the following to the dependencies of your package.json.
 ```json
 {
-    "api-gateway-openapi-validator": "git://github.com/CariPay/api-gateway-openapi-validator.git" 
+    "api-gateway-openapi-validator": "git://github.com/CariPay/api-gateway-openapi-validator.git#branch_name" 
 }
 ```
 
@@ -61,15 +61,30 @@ exports.handler = new OpenApiValidator(options, handler).install();
 - options: `<Object>`: Parameters used to customize the validator
 
     - apiSpec: The path to the open api documentation to use for validation (required, must be v3)
-    - removeAdditional: Whether additional properties not contained in the documentation's schema should be accepted and removed for all request types and responses
+    - removeAdditional: Whether additional properties not contained in the documentation's schema should be accepted and removed for all request types and responses. See https://ajv.js.org/#options for more information.
     - contentType: The default content format used in a request and response (default: application/json)
     - requestBodyTransformer: Function used to transform the body of a request (`argument: body obtained from event.body, returns: transformed response`)
     - requestPathTransformer: Function used to transform the body of a request (`argument: path obtained from event.pathParameters, returns: transformed response`)
     - requestQueryTransformer: Function used to transform the body of a request (`argument: query obtained from event.queryStringParameters, returns: transformed response`)
-    - responseErrorTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode, message; returns: transformed response`)
-    - responseSuccessTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode; returns: transformed response`)
+    - responseErrorTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode, message; returns: transformed response`). **See note below.
+    - responseSuccessTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode; returns: transformed response`) **See note below
     - validateRequests: Whether or not to validate the request body, params, query, headers to the api documentation included (`default: false`)
     - validateResponses: Whether or not to validate the response to the api documentation included (`default: false`)
+
+    ***
+    Note: If specifying a response transformer, it should be noted that you are responsible for returning a response in a format required by api gateway to resolve the request.
+
+        ```js
+        // Example
+        return {
+            body: transformedResponse,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': true,
+            },
+            statusCode: 200,
+        }
+        ```
 - handler: `<Function>`: Main functionality of the API code
     #### Arguments
     - event: Provides information about the request (path, headers, body, etc)
