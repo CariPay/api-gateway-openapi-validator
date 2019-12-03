@@ -1,4 +1,5 @@
 const OpenApiValidator = require('src/index');
+const apiSpec = require('examples/swagger.json');
 
 /**
  *
@@ -13,20 +14,23 @@ const OpenApiValidator = require('src/index');
  * 
  */
 
+const options = {
+    apiSpec,
+    validateSpec: false, // Setting to false since we have verified that the api spec being used is indeed valid v3 open api spec
+    validateRequests: false,
+    validateResponses: true,
+    removeAdditional: true,
+};
 
-exports.lambdaHandler = new OpenApiValidator(
-    {
-        apiSpec: 'examples/swagger.json',
-        validateSpec: false, // Setting to false since we have verified that the api spec being used is indeed valid v3 open api spec
-        validateRequests: true,
-        validateResponses: true,
-        removeAdditional: true,
-    },
-    async (event, context) => {
-        try {
-            return [ event.body, 200 ];
-        } catch (err) {
-            console.log(err);
-            return err;
-        }
-}).install();
+const lambda = async (event, context) => {
+    try {
+        return [ event.body, 200 ];
+    } catch (err) {
+        console.log(err);
+        return err;
+    }
+};
+
+const validator = new OpenApiValidator(options, lambda);
+
+exports.lambdaHandler = validator.install();

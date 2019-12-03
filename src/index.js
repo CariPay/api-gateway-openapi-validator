@@ -82,7 +82,6 @@ module.exports = class OpenApiValidator {
                         response = this.responseSuccessTransformer(response, statusCode);
                     } else {
                         response = this._constructDefaultResponse(response, statusCode);
-                        
                     }
                 } else if (this.responseErrorTransformer) {
                     response = this.responseErrorTransformer(response, statusCode, message);
