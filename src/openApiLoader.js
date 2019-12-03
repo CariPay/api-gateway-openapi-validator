@@ -20,17 +20,22 @@ module.exports = class OpenApiLoader {
         }
     }
 
+    validate(fileContent) {
+        const validator = new OpenAPISchemaValidator({
+            version: fileContent.openapi,
+        });
+        if (validator.validate(fileContent).errors.length) {
+            throw new Error('Provided API specification is not valid');
+        }
+    }
+
     async getDoc () {
         const fileContent = await this._loadDoc(this._options.filePath);
 
         if (this._options.validateSpec) {
-            const validator = new OpenAPISchemaValidator({
-                version: fileContent.openapi,
-            });
-            if (validator.validate(fileContent).errors.length) {
-                throw new Error('Provided API specification is not valid');
-            }
+            this.validate(fileContent);
         }
+
         return fileContent;
     }
 }
