@@ -60,7 +60,7 @@ exports.handler = new OpenApiValidator(options, handler).install();
 
 - options: `<Object>`: Parameters used to customize the validator
 
-    - apiSpec: The path to the open api documentation to use for validation (required, must be v3)
+    - apiSpec: The open api documentation to use for validation in json format(required, must be v3)
     - removeAdditional: Whether additional properties not contained in the documentation's schema should be accepted and removed for all request types and responses. See https://ajv.js.org/#options for more information.
     - contentType: The default content format used in a request and response (default: application/json)
     - requestBodyTransformer: Function used to transform the body of a request (`argument: body obtained from event.body, returns: transformed response`)
@@ -101,3 +101,9 @@ exports.handler = new OpenApiValidator(options, handler).install();
 ## Example
 
 You can try out the example implementation of the validator locally by reading the implementation and setup docs [here](./examples/README.md).
+
+## Disclaimer
+
+Validation of the apiSpec is an important step for the security of our apis but increases the response time of the lambda execution significantly. As such, document validation was removed from the functional execution of the library, but code still exist to help with validating the input. If document validation is important to your use case, feel free to fork this project and use the code here: [./src/openApiLoader](./src/openApiLoader) to extend [./src/index.js](./src/index.js).
+
+This step was added to the build step of our external projects to ensure that the schema used were always validated and could be replicated for similar projects while reducing the need to validate the documentation on lambda invocation.

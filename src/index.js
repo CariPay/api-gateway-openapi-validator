@@ -7,8 +7,8 @@ const { TYPE_JSON } = require('./constants');
 
 module.exports = class OpenApiValidator {
     constructor(params, lambdaBody) {
-        if (!params.apiSpec) {
-            throw Error('Missing requred API spec path');
+        if (!params.apiSpec || !isJson(params.apiSpec)) {
+            throw Error('API spec not found or invalid');
         }
         this.apiSpec = params.apiSpec;
         this.contentType = params.contentType || TYPE_JSON;
@@ -23,7 +23,6 @@ module.exports = class OpenApiValidator {
         this.removeAdditional = params.removeAdditional === undefined
             ? false
             : params.removeAdditional;
-        this.apiDoc = {}
         this.config = {};
         this.lambdaBody = lambdaBody;
     }
@@ -31,18 +30,12 @@ module.exports = class OpenApiValidator {
     install () {
         return async (event, context, callback) => {
             try {
-                const loader = new OpenApiLoader({
-                    filePath: this.apiSpec,
-                    validateSpec: this.validateSpec,
-                });
-                this.apiDoc = await loader.getDoc();
-
                 if (isJson(event.body)) {
                     event.body = JSON.parse(event.body);
                 }
                 this.event = event;
     
-                const { paths } = this.apiDoc;
+                const { paths } = this.apiSpec;
                 const {
                     body,
                     httpMethod,
@@ -134,7 +127,7 @@ module.exports = class OpenApiValidator {
     _validateRequests (path, event, schema) {
         if (schema) {
             const requestValidator = new RequestValidator(
-                this.apiDoc,
+                this.apiSpec,
                 {
                     removeAdditional: this.removeAdditional,
                 },
@@ -162,7 +155,7 @@ module.exports = class OpenApiValidator {
     _validateResponses (path, response, schema, statusCode) {
         if (schema) {
             const responseValidator = new ResponseValidator(
-                this.apiDoc,
+                this.apiSpec,
                 {
                     removeAdditional: this.removeAdditional,
                 },
