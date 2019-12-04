@@ -20,9 +20,8 @@ module.exports = class OpenApiValidator {
         this.requestQueryTransformer = params.requestQueryTransformer;
         this.responseSuccessTransformer = params.responseSuccessTransformer;
         this.responseErrorTransformer = params.responseErrorTransformer;
-        this.removeAdditional = params.removeAdditional === undefined
-            ? false
-            : params.removeAdditional;
+        this.removeAdditionalRequestProps = params.removeAdditionalRequestProps || false;
+        this.removeAdditionalResponseProps = params.removeAdditionalResponseProps || false;
         this.config = {};
         this.lambdaBody = lambdaBody;
     }
@@ -128,7 +127,7 @@ module.exports = class OpenApiValidator {
             const requestValidator = new RequestValidator(
                 this.apiSpec,
                 {
-                    removeAdditional: this.removeAdditional,
+                    removeAdditional: this.removeAdditionalRequestProps,
                 },
                 schema);
             const request = {
@@ -156,7 +155,7 @@ module.exports = class OpenApiValidator {
             const responseValidator = new ResponseValidator(
                 this.apiSpec,
                 {
-                    removeAdditional: this.removeAdditional,
+                    removeAdditional: this.removeAdditionalResponseProps,
                 },
                 schema);
             responseValidator.validate(path, response, statusCode);

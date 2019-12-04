@@ -19,7 +19,8 @@ const options = {
     validateSpec: false, // Setting to false since we have verified that the api spec being used is indeed valid v3 open api spec
     validateRequests: false,
     validateResponses: true,
-    removeAdditional: true,
+    removeAdditionalRequestProps: true,
+    removeAdditionalResponseProps: true,
 };
 
 const lambda = async (event, context) => {
