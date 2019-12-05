@@ -61,7 +61,8 @@ exports.handler = new OpenApiValidator(options, handler).install();
 - options: `<Object>`: Parameters used to customize the validator
 
     - apiSpec: The open api documentation to use for validation in json format(required, must be v3)
-    - removeAdditional: Whether additional properties not contained in the documentation's schema should be accepted and removed for all request types and responses. See https://ajv.js.org/#options for more information.
+    - removeAdditionalRequestProps: Whether additional properties not contained in the documentation's schema should be accepted and be removed. See https://ajv.js.org/#options for more information.
+    - removeAdditionalResponseProps: Whether additional properties not contained in the documentation's schema should be accepted and be removed. See https://ajv.js.org/#options for more information.
     - contentType: The default content format used in a request and response (default: application/json)
     - requestBodyTransformer: Function used to transform the body of a request (`argument: body obtained from event.body, returns: transformed response`)
     - requestPathTransformer: Function used to transform the body of a request (`argument: path obtained from event.pathParameters, returns: transformed response`)
