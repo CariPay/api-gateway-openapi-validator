@@ -1,0 +1,22 @@
+{
+  "name": "api-gateway-openapi-validator",
+  "version": "0.1.0",
+  "main": "src/index.js",
+  "repository": "https://github.com/CariPay/api-gateway-openapi-validator.git",
+  "author": "DarionHernandez <darionhernandez868@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "develop": "webpack --config webpack.config.js --mode development --watch",
+    "build": "npm install && webpack --config webpack.config.js --mode production"
+  },
+  "dependencies": {
+    "ajv": "^6.10.2",
+    "json-schema-ref-parser": "^7.1.2",
+    "lodash": "^4.17.15"
+  },
+  "devDependencies": {
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  }
+}
