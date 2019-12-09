@@ -43,14 +43,14 @@ module.exports = class OpenApiValidator {
                     queryStringParameters,
                 } = this.event;
                 const httpMethodLower = httpMethod.toLowerCase();
-    
-                if ((!paths[path] || !paths[path][httpMethodLower])
-                    && this.validateRequests
-                    && this.validateResponses) {
-                    throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
+
+                if (this.validateRequests && this.validateResponses) {
+                    if (!paths[path] || !paths[path][httpMethodLower]) {
+                        throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
+                    }
+                    this.config = paths[path][httpMethodLower];
                 }
-                this.config = paths[path][httpMethodLower];
-    
+                
                 // Validate Requests
                 if (this.validateRequests) {
                     const filteredRequest = this._validateRequests(path, this.event, this.config);
