@@ -44,7 +44,7 @@ module.exports = class OpenApiValidator {
                 } = this.event;
                 const httpMethodLower = httpMethod.toLowerCase();
 
-                if (this.validateRequests && this.validateResponses) {
+                if (this.validateRequests || this.validateResponses) {
                     if (!paths[path] || !paths[path][httpMethodLower]) {
                         throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
                     }
