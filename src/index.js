@@ -50,7 +50,7 @@ module.exports = class OpenApiValidator {
                         this.config = paths[path][httpMethodLower];
                     }
                     else {
-                        const pathKeys = Object.keys(pathKeys);
+                        const pathKeys = Object.keys(paths);
                         // Converts accounts/{uuid} to accounts/[a-zA-z0-9-] to find key
                         const foundKey = find(pathKeys, key => {
                             const regex = RegExp(key.replace(/{.*}/, '[a-zA-z0-9-]');
