@@ -1,3 +1,4 @@
+const { find } = require('lodash');
 const OpenApiLoader = require('./openApiLoader');
 const RequestValidator = require('./openApiRequestValidator');
 const ResponseValidator = require('./openApiResponseValidator');
@@ -45,10 +46,24 @@ module.exports = class OpenApiValidator {
                 const httpMethodLower = httpMethod.toLowerCase();
 
                 if (this.validateRequests || this.validateResponses) {
-                    if (!paths[path] || !paths[path][httpMethodLower]) {
-                        throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
+                    if (paths[path] && paths[path][httpMethodLower]) {
+                        this.config = paths[path][httpMethodLower];
                     }
-                    this.config = paths[path][httpMethodLower];
+                    else {
+                        const pathKeys = Object.keys(paths);
+                        // Converts accounts/{uuid} to accounts/[a-zA-z0-9-] to find key
+                        const foundKey = find(pathKeys, key => {
+                            const regex = RegExp(key.replace(/{.*}/, '[a-zA-z0-9-]');
+                            return regex.test(path) && paths[key][httpMethodLower];
+                        });
+                        if (foundKey) {
+                            this.config = paths[foundKey][httpMethodLower];
+                        }
+                        else {
+                            throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
+                        }
+                    }
+                    
                 }
                 
                 // Validate Requests
