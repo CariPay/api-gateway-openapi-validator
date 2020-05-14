@@ -1,4 +1,5 @@
 const { Ajv } = require('ajv');
+const get = require('lodash/get');
 
 const { createResponseAjv } = require('./middleware/ajv');
 const { augumentAjvErrors } = require('./utils');
@@ -6,11 +7,12 @@ const { ValidationError } = require('./errors');
 const { TYPE_JSON } = require('./constants');
 
 module.exports = class ResponseValidator {
-    constructor(apiDoc, options, schema) {
+    constructor(apiDoc, options, schema, role = null) {
         this._apiDoc = apiDoc;
         this._options = options;
         this._schema = schema;
         this._ajv = createResponseAjv(apiDoc, options);
+        this._role = role;
     }
 
     validate(path, response, statusCode, options = {}) {
@@ -41,7 +43,12 @@ module.exports = class ResponseValidator {
             // don't validate, assume content is valid
             continue;
           }
-          const schema = response.content[TYPE_JSON].schema;
+          const schema = this._role
+            ? get(response.content[TYPE_JSON].schema, `properties.${this._role}`)
+            : response.content[TYPE_JSON].schema;
+          if (!schema) {
+            throw new Error(`content.${TYPE_JSON}.schema does not exist for role ${this._role}`);
+          }
           // Nested schema into response object to avoid having to transform $ref if it is one of the schema's primary keys
           schemas[name] = {
             type: 'object',
