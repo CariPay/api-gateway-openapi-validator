@@ -25,6 +25,23 @@
     },
     "requestContext": {
       "accountId": "123456789012",
+      "authorizer": {
+        "claims": {
+          "sub": "a679af83-1061-4939-a71f-717055aa6a3d",
+          "email_verified": "true",
+          "iss": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_g4UaGngGG",
+          "cognito:usernamE": "a679af83-1061-4939-a71f-717055aa6a3d",
+          "aud": "235s6egfj650pn73ogt00b970p",
+          "event_id": "54ff0bcc-078c-4d3b-a70d-6c9f84ce5ee7",
+          "custom:company_role": "admin",
+          "token_use": "id",
+          "auth_time": "1589252988",
+          "name": "Tester",
+          "exp": "Tue May 12 04:09:49 UTC 2020",
+          "iat": "Tue May 12 03:09:49 UTC 2020",
+          "email": "myemail.com"
+        }
+      },
       "resourceId": "123456",
       "stage": "prod",
       "requestId": "c6af9ac6-7b61-11e6-9a41-93e8deadbeef",
