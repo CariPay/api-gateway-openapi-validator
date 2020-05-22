@@ -21,6 +21,8 @@ const options = {
     validateResponses: true,
     removeAdditionalRequestProps: true,
     removeAdditionalResponseProps: true,
+    roleAuthorizerKey: 'custom:company_role',
+    filterByRole: true,
 };
 
 const lambda = async (event, context) => {

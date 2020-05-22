@@ -33,8 +33,10 @@ const camelCase = require('./camelCase');
 
 const options = {
     apiSpec: './swagger.json',
+    filterByRole: true,
     validateRequests: true,
     validateResponses: true,
+    roleAuthorizerKey: 'custom:role',
     requestBodyTransformer: (body) => {
         return camelCase(body);
     },
@@ -61,6 +63,8 @@ exports.handler = new OpenApiValidator(options, handler).install();
 - options: `<Object>`: Parameters used to customize the validator
 
     - apiSpec: The open api documentation to use for validation in json format(required, must be v3)
+    - defaultRoleName: The default role to use if a user does not have a role in the event authorizer property. (`default: default`) **See example in /examples.
+    - filterByRole: Whether the validator should use a role specified in the event's authorizer property to filter results based on data in the openapi documentation. (`default: false`) **See example in /examples.
     - removeAdditionalRequestProps: Whether additional properties not contained in the documentation's schema should be accepted and be removed. See https://ajv.js.org/#options for more information.
     - removeAdditionalResponseProps: Whether additional properties not contained in the documentation's schema should be accepted and be removed. See https://ajv.js.org/#options for more information.
     - contentType: The default content format used in a request and response (default: application/json)
@@ -69,6 +73,7 @@ exports.handler = new OpenApiValidator(options, handler).install();
     - requestQueryTransformer: Function used to transform the body of a request (`argument: query obtained from event.queryStringParameters, returns: transformed response`)
     - responseErrorTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode, message; returns: transformed response`). **See note below.
     - responseSuccessTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode; returns: transformed response`) **See note below
+    - roleAuthorizerKey: The key used to access the role property from a user in the event authorizer property. **See example in /examples.
     - validateRequests: Whether or not to validate the request body, params, query, headers to the api documentation included (`default: false`)
     - validateResponses: Whether or not to validate the response to the api documentation included (`default: false`)
 

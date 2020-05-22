@@ -148,7 +148,12 @@
                 },
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/Pet"
+                    "type": "object",
+                    "properties": {
+                      "admin": {
+                        "$ref": "#/components/schemas/Pet"
+                      }
+                    }
                   }
                 }
               }

@@ -1,4 +1,5 @@
-const { find } = require('lodash');
+const find = require('lodash/find');
+const get = require('lodash/get');
 const OpenApiLoader = require('./openApiLoader');
 const RequestValidator = require('./openApiRequestValidator');
 const ResponseValidator = require('./openApiResponseValidator');
@@ -23,6 +24,9 @@ module.exports = class OpenApiValidator {
         this.responseErrorTransformer = params.responseErrorTransformer;
         this.removeAdditionalRequestProps = params.removeAdditionalRequestProps || false;
         this.removeAdditionalResponseProps = params.removeAdditionalResponseProps || false;
+        this.roleAuthorizerKey = params.roleAuthorizerKey || null;
+        this.filterByRole = params.filterByRole || false;
+        this.defaultRoleName = params.defaultRoleName || 'default';
         this.config = {};
         this.lambdaBody = lambdaBody;
     }
@@ -121,15 +125,22 @@ module.exports = class OpenApiValidator {
                     converted = true;
                 }
 
-                if (this.validateResponses) {
-                    const filteredResponse = this._validateResponses(path, responseToValidate, this.config, statusCode);
+                if (this.validateResponses || this.filterByRole) {
+                    let filteredResponse = null;
+                    if (this.filterByRole && this.roleAuthorizerKey){
+                        // Get role for requestContenxt > authorizer > roleKey
+                        // if it doesn't exist for the user, use the default role
+                        const role = get(event, `requestContext.authorizer.claims.${this.roleAuthorizerKey}`, event.requestContext.authorizer.claims[this.defaultRoleName]);
+                        filteredResponse = this._validateResponses(path, responseToValidate, this.config, statusCode, role);
+                    } else {
+                        filteredResponse = this._validateResponses(path, responseToValidate, this.config, statusCode);
+                    }
                     // Replace the content of the response by filtering based on the documentation
                     Object.assign(response, { body: converted ? JSON.stringify(filteredResponse) : filteredResponse });
                 }
                 
                 callback(null, response);
             } catch (error) {
-                console.log(error);
                 callback(null, {
                     body: JSON.stringify({ message: error.message }),
                     statusCode: error.statusCode || 500,
@@ -167,19 +178,20 @@ module.exports = class OpenApiValidator {
         }
     }
 
-    _validateResponses (path, response, schema, statusCode) {
+    _validateResponses (path, response, schema, statusCode, role = null) {
         if (schema) {
             const responseValidator = new ResponseValidator(
                 this.apiSpec,
                 {
                     removeAdditional: this.removeAdditionalResponseProps,
                 },
-                schema);
+                schema,
+                role);
             responseValidator.validate(path, response, statusCode);
 
-            // @NOTE: ajv validator replaces the response with the sanitized data
-            return response;
         }
+        // @NOTE: ajv validator replaces the response with the sanitized data
+        return response;
     }
 
     _constructDefaultResponse (response, statusCode) {
