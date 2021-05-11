@@ -24,6 +24,8 @@ module.exports = class OpenApiValidator {
         this.responseErrorTransformer = params.responseErrorTransformer;
         this.removeAdditionalRequestProps = params.removeAdditionalRequestProps || false;
         this.removeAdditionalResponseProps = params.removeAdditionalResponseProps || false;
+        this.lambdaSetup = params.lambdaSetup;
+        this.lambdaTearDown = params.lambdaTearDown;
         this.roleAuthorizerKey = params.roleAuthorizerKey || null;
         this.filterByRole = params.filterByRole || false;
         this.defaultRoleName = params.defaultRoleName || 'default';
@@ -90,11 +92,20 @@ module.exports = class OpenApiValidator {
                     const transformedQuery = this.requestQueryTransformer(queryStringParameters || {});
                     this.event.queryStringParameters = transformedQuery;
                 }
+
+                if (this.lambdaSetup) {
+                    const lambdaSetup = await this.lambdaSetup(event, context);
+                    this.event.setupData = lambdaSetup;
+                }
     
                 const lambdaResponse = await this.lambdaBody(event, context, callback);
                 // Response from lambda should return an array containing the response and statusCode
                 // It is expected that the lambda handles errors accordingly to return the correct status code and response
                 let [ response, statusCode, message='' ] = lambdaResponse;
+
+                if (this.lambdaTearDown) {
+                    await this.lambdaTearDown(event, context);
+                }
     
                 // Informational and Success responses use the success transformer
                 if (statusCode < 300) {
