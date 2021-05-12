@@ -50,28 +50,25 @@ module.exports = class OpenApiValidator {
                     queryStringParameters,
                 } = this.event;
                 const httpMethodLower = httpMethod.toLowerCase();
-
-                if (this.validateRequests || this.validateResponses) {
-                    if (paths[path] && paths[path][httpMethodLower]) {
-                        this.config = paths[path][httpMethodLower];
+                
+                if (paths[path] && paths[path][httpMethodLower]) {
+                    this.config = paths[path][httpMethodLower];
+                }
+                else {
+                    const pathKeys = Object.keys(paths);
+                    // Converts accounts/{uuid} to accounts/[a-zA-z0-9-] to find key
+                    const foundKey = find(pathKeys, key => {
+                        const regex = RegExp(key.replace(/{.*}/, '([a-zA-z0-9-])+') + '$');
+                        return regex.test(path) && paths[key][httpMethodLower];
+                    });
+                    if (foundKey) {
+                        this.config = paths[foundKey][httpMethodLower];
                     }
                     else {
-                        const pathKeys = Object.keys(paths);
-                        // Converts accounts/{uuid} to accounts/[a-zA-z0-9-] to find key
-                        const foundKey = find(pathKeys, key => {
-                            const regex = RegExp(key.replace(/{.*}/, '([a-zA-z0-9-])+') + '$');
-                            return regex.test(path) && paths[key][httpMethodLower];
-                        });
-                        if (foundKey) {
-                            this.config = paths[foundKey][httpMethodLower];
-                        }
-                        else {
-                            throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
-                        }
+                        throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
                     }
-                    
                 }
-                
+                this.event.routeConfig = this.config;
                 // Validate Requests
                 if (this.validateRequests) {
                     const filteredRequest = this._validateRequests(path, this.event, this.config);
