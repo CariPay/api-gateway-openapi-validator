@@ -65,6 +65,8 @@ exports.handler = new OpenApiValidator(options, handler).install();
     - apiSpec: The open api documentation to use for validation in json format(required, must be v3)
     - defaultRoleName: The default role to use if a user does not have a role in the event authorizer property. (`default: default`) **See example in /examples.
     - filterByRole: Whether the validator should use a role specified in the event's authorizer property to filter results based on data in the openapi documentation. (`default: false`) **See example in /examples.
+    - lambdaSetup: Handle async data before running the main lambda code and return the response back to the lambda in the event. Can be used to get and update authentication data.
+    - lambdaTearDown: Handle async after running the main lambda code. Can be used to update authentication.
     - removeAdditionalRequestProps: Whether additional properties not contained in the documentation's schema should be accepted and be removed. See https://ajv.js.org/#options for more information.
     - removeAdditionalResponseProps: Whether additional properties not contained in the documentation's schema should be accepted and be removed. See https://ajv.js.org/#options for more information.
     - contentType: The default content format used in a request and response (default: application/json)
