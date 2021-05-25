@@ -149,6 +149,8 @@ module.exports = class OpenApiValidator {
                 
                 callback(null, response);
             } catch (error) {
+                // Log the error so it can be show in cloudwatch
+                console.log(error);
                 callback(null, {
                     body: JSON.stringify({ message: error.message }),
                     statusCode: error.statusCode || 500,
