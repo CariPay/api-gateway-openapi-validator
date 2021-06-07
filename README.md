@@ -76,6 +76,7 @@ exports.handler = new OpenApiValidator(options, handler).install();
     - responseErrorTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode, message; returns: transformed response`). **See note below.
     - responseSuccessTransformer: Function used to transform the body of a request (`argument: response from lambda, statusCode; returns: transformed response`) **See note below
     - roleAuthorizerKey: The key used to access the role property from a user in the event authorizer property. **See example in /examples.
+    - useDefaults: Whether or not to use the default values specified in the api doc if it isn't specified in a request only
     - validateRequests: Whether or not to validate the request body, params, query, headers to the api documentation included (`default: false`)
     - validateResponses: Whether or not to validate the response to the api documentation included (`default: false`)
 
