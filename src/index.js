@@ -28,6 +28,7 @@ module.exports = class OpenApiValidator {
         this.lambdaTearDown = params.lambdaTearDown;
         this.roleAuthorizerKey = params.roleAuthorizerKey || null;
         this.filterByRole = params.filterByRole || false;
+        this.useDefaults = params.useDefaults || false;
         this.defaultRoleName = params.defaultRoleName || 'default';
         this.config = {};
         this.lambdaBody = lambdaBody;
@@ -165,7 +166,10 @@ module.exports = class OpenApiValidator {
             const requestValidator = new RequestValidator(
                 this.apiSpec,
                 {
+                    nullable: true,
                     removeAdditional: this.removeAdditionalRequestProps,
+                    strictRequired: true,
+                    useDefault: this.useDefaults,
                 },
                 schema);
             const request = {
@@ -193,7 +197,9 @@ module.exports = class OpenApiValidator {
             const responseValidator = new ResponseValidator(
                 this.apiSpec,
                 {
+                    nullable: true,
                     removeAdditional: this.removeAdditionalResponseProps,
+                    strictRequired: 'log',
                 },
                 schema,
                 role);
