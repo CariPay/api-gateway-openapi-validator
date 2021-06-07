@@ -166,6 +166,7 @@ module.exports = class OpenApiValidator {
             const requestValidator = new RequestValidator(
                 this.apiSpec,
                 {
+                    nullable: true,
                     removeAdditional: this.removeAdditionalRequestProps,
                     strictRequired: true,
                     useDefault: this.useDefaults,
