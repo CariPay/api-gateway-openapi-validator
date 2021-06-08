@@ -166,6 +166,7 @@ module.exports = class OpenApiValidator {
             const requestValidator = new RequestValidator(
                 this.apiSpec,
                 {
+                    coerceTypes: true,
                     nullable: true,
                     removeAdditional: this.removeAdditionalRequestProps,
                     strictRequired: true,
@@ -197,6 +198,7 @@ module.exports = class OpenApiValidator {
             const responseValidator = new ResponseValidator(
                 this.apiSpec,
                 {
+                    coerceTypes: true,
                     nullable: true,
                     removeAdditional: this.removeAdditionalResponseProps,
                     strictRequired: 'log',
