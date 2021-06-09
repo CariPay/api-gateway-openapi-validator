@@ -70,13 +70,6 @@ module.exports = class OpenApiValidator {
                     }
                 }
                 this.event.routeConfig = this.config;
-                // Validate Requests
-                if (this.validateRequests) {
-                    const filteredRequest = this._validateRequests(path, this.event, this.config);
-                    
-                    // Replace the properties of the event with the filtered ones (body, queryParams, pathParams)
-                    Object.assign(this.event, filteredRequest);
-                }
                 // Transform Requests
                 if (this.requestBodyTransformer) {
                     const transformedBody = this.requestBodyTransformer(body || {});
@@ -89,6 +82,13 @@ module.exports = class OpenApiValidator {
                 if (this.requestQueryTransformer) {
                     const transformedQuery = this.requestQueryTransformer(queryStringParameters || {});
                     this.event.queryStringParameters = transformedQuery;
+                }
+                // Validate Requests
+                if (this.validateRequests) {
+                    const filteredRequest = this._validateRequests(path, this.event, this.config);
+                    
+                    // Replace the properties of the event with the filtered ones (body, queryParams, pathParams)
+                    Object.assign(this.event, filteredRequest);
                 }
 
                 if (this.lambdaSetup) {
