@@ -8,7 +8,8 @@
   "private": true,
   "scripts": {
     "develop": "webpack --config webpack.config.js --mode development --watch",
-    "build": "npm install && webpack --config webpack.config.js --mode production"
+    "build": "npm install && webpack --config webpack.config.js --mode production",
+    "test": "jest ./src"
   },
   "dependencies": {
     "ajv": "^6.12.0",
@@ -16,7 +17,14 @@
     "lodash": "^4.17.21"
   },
   "devDependencies": {
+    "husky": "^6.0.0",
+    "jest": "^27.0.4",
     "webpack": "^5.37.0",
     "webpack-cli": "^4.7.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-push": "npm run test"
+    }
   }
 }
