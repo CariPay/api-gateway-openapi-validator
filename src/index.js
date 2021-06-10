@@ -5,6 +5,7 @@ const RequestValidator = require('./openApiRequestValidator');
 const ResponseValidator = require('./openApiResponseValidator');
 const { ValidationError } = require('./errors');
 const { isJson } = require('./utils');
+const { comparePathToSpecPath } = require('./helpers');
 const { TYPE_JSON } = require('./constants');
 
 module.exports = class OpenApiValidator {
@@ -59,8 +60,9 @@ module.exports = class OpenApiValidator {
                     const pathKeys = Object.keys(paths);
                     // Converts accounts/{uuid} to accounts/[a-zA-z0-9-] to find key
                     const foundKey = find(pathKeys, key => {
-                        const regex = RegExp(key.replace(/{.*}/, '([a-zA-z0-9-])+') + '$');
-                        return regex.test(path) && paths[key][httpMethodLower];
+                        // The key should always contain a-zA-Z only but also accomodate for numbers if necessary and nothing else
+                        const compare = comparePathToSpecPath(key, path);
+                        return compare && paths[key][httpMethodLower];
                     });
                     if (foundKey) {
                         this.config = paths[foundKey][httpMethodLower];
@@ -180,7 +182,6 @@ module.exports = class OpenApiValidator {
                 params: event.pathParameters || {},
             };
             requestValidator.validate(path, request);
-
             // @NOTE: ajv validator replaces the request with the sanitized data
 
             // Replace the request properties with the values after validation to ensure that the values are filtered
