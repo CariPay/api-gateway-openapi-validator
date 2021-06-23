@@ -73,7 +73,11 @@ module.exports = class OpenApiValidator {
                             throw new ValidationError(`The path ${path} could not be found with http method ${httpMethodLower} in the API spec`, 400);
                         }
                     }
+                    // Add the swagger spec for the individual route to the event
                     this.event.routeConfig = this.config;
+
+                    // Add additional configuration containing resource limit or metadata
+                    this.event.resources = this.config['x-resources'] || [];
                 }
                 // Validate Requests
                 if (this.validateRequests) {
@@ -107,7 +111,7 @@ module.exports = class OpenApiValidator {
                 let [ response, statusCode, message='' ] = lambdaResponse;
 
                 if (this.lambdaTearDown) {
-                    await this.lambdaTearDown(event, context);
+                    response = await this.lambdaTearDown(event, context, response);
                 }
     
                 // Informational and Success responses use the success transformer
