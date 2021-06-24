@@ -77,7 +77,7 @@ module.exports = class OpenApiValidator {
                     this.event.routeConfig = this.config;
 
                     // Add additional configuration containing resource limit or metadata
-                    this.event.resources = this.config['x-resources'] || [];
+                    this.event.resources = this.apiSpec['x-resources'] || [];
                 }
                 // Validate Requests
                 if (this.validateRequests) {
