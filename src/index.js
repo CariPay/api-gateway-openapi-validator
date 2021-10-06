@@ -30,6 +30,7 @@ module.exports = class OpenApiValidator {
         this.roleAuthorizerKey = params.roleAuthorizerKey || null;
         this.filterByRole = params.filterByRole || false;
         this.useDefaults = params.useDefaults || false;
+        this.maintenanceMode = params.maintenanceMode || false;
         this.defaultRoleName = params.defaultRoleName || 'default';
         this.config = {};
         this.lambdaBody = lambdaBody;
@@ -52,6 +53,10 @@ module.exports = class OpenApiValidator {
                     queryStringParameters,
                 } = this.event;
                 const httpMethodLower = httpMethod.toLowerCase();
+
+                if (this.maintenanceMode) {
+                    throw new ValidationError('This API is currently under maintenance', 503);
+                }
 
                 if (this.validateRequests || this.validateResponses) {
                 
